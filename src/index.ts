@@ -1,5 +1,5 @@
-const selectedItems: ReadonlyArray<SceneNode> = figma.currentPage.selection
 const currentPage: PageNode = figma.currentPage
+const selectedItems: ReadonlyArray<SceneNode> = currentPage.selection
 const root: DocumentNode = figma.root
 
 
@@ -25,7 +25,7 @@ function main (): void {
 }
 
 async function getNodePrototypeLink (node: SceneNode|BaseNode): Promise<void> {
-  const fileId: string = await figma.clientStorage.getAsync('shareFileId')
+  const fileId: string = await root.getPluginData('shareFileId')
 
   figma.ui.postMessage({nodeId: node.id, fileId, fileName: root.name}, {origin: '*'})
 
@@ -35,7 +35,7 @@ async function getNodePrototypeLink (node: SceneNode|BaseNode): Promise<void> {
       return
     }
     if (msg.type === 'link-copied') {
-      await figma.clientStorage.setAsync('shareFileId', msg.fileId)
+      await root.setPluginData('shareFileId', msg.fileId)
       figma.closePlugin('Prototype link copied to clipboard')
       return
     }
