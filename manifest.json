@@ -1,0 +1,7 @@
+{
+  "name": "Copy Prototype Link",
+  "id": "832335368157959508",
+  "api": "1.0.0",
+  "main": "dist/index.js",
+  "ui": "dist/ui.html"
+}

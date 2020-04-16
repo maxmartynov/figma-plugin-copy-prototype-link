@@ -1,0 +1,44 @@
+{
+  "name": "figma-plugin-copy-prototype-link",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "watch": "node_modules/.bin/webpack --watch",
+    "minify": "node_modules/.bin/webpack --config webpack.config.js",
+    "build": "node_modules/.bin/tsc --build tsconfig.json && npm run minify",
+    "bump": "node_modules/.bin/bump prompt --tag --all --push --commit 'v%s'",
+    "patch": "node_modules/.bin/bump patch --tag --all --push --commit 'v%s'",
+    "preversion": "echo 'Building before bump...' && npm run build"
+  },
+  "keywords": [
+    "figma",
+    "plugin",
+    "copy",
+    "prototype",
+    "link"
+  ],
+  "author": "Max Martynov <martynov.max.s@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxmartynov/figma-plugin-copy-prototype-link.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxmartynov/figma-plugin-copy-prototype-link/issues"
+  },
+  "homepage": "https://github.com/maxmartynov/figma-plugin-copy-prototype-link/#readme",
+  "devDependencies": {
+    "babel-minify-webpack-plugin": "^0.3.1",
+    "css-loader": "^3.5.2",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.8.3",
+    "url-loader": "^2.1.0",
+    "version-bump-prompt": "^6.0.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}
