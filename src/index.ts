@@ -1,9 +1,6 @@
-console.log(this)
 const selectedItems: ReadonlyArray<SceneNode> = figma.currentPage.selection
-const root: DocumentNode = figma.root
 const currentPage: PageNode = figma.currentPage
-
-console.log('plugin: ')
+const root: DocumentNode = figma.root
 
 
 main()
@@ -15,7 +12,6 @@ function main (): void {
   }
 
   const node: SceneNode|BaseNode|undefined = findItemForLink()
-  console.log('node: ', node && node.id)
 
   if (!node) {
     return figma.closePlugin('ERROR: Could not get the link item')
@@ -30,9 +26,8 @@ function main (): void {
 
 async function getNodePrototypeLink (node: SceneNode|BaseNode): Promise<void> {
   const fileId: string = await figma.clientStorage.getAsync('shareFileId')
-  console.log('get fileId: ', fileId)
 
-  figma.ui.postMessage({nodeId: node.id, fileId}, {origin: '*'})
+  figma.ui.postMessage({nodeId: node.id, fileId, fileName: root.name}, {origin: '*'})
 
   figma.ui.onmessage = async (msg) => {
     if (msg.type === 'cancel') {

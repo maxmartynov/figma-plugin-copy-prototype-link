@@ -2,14 +2,17 @@ const $img: HTMLElement = document.getElementById('image')
 const $message: HTMLElement = document.getElementById('message')
 const $input = document.getElementById('input') as HTMLInputElement
 let nodeId: string
+let fileName: string
 
 onmessage = (event) => {
-  const msg: {fileId: string, nodeId: string} = event.data.pluginMessage
+  const msg: {fileId: string, nodeId: string, fileName: string} =
+    event.data.pluginMessage
   nodeId = msg.nodeId
-  copyLink(msg.fileId, nodeId)
+  fileName = msg.fileName
+  copyLink(msg.fileId, fileName, nodeId)
 }
 
-function copyLink (fileId: string, nodeId: string) {
+function copyLink (fileId: string, fileName: string, nodeId: string) {
   let link: string
 
   $img.style.display = 'none'
@@ -17,7 +20,7 @@ function copyLink (fileId: string, nodeId: string) {
 
   if (fileId) {
     $input.value = fileId
-    link = generatePrototypeLink(fileId, nodeId)
+    link = generatePrototypeLink(fileId, fileName, nodeId)
     copyToClipboard(link)
   } else {
     $img.style.display = 'block'
@@ -29,7 +32,7 @@ function copyLink (fileId: string, nodeId: string) {
 
 document.getElementById('copy').onclick = () => {
   const fileId: string = $input.value
-  const link: string = copyLink(fileId, nodeId)
+  const link: string = copyLink(fileId, fileName, nodeId)
   if (!link) return
   parent.postMessage({pluginMessage: {type: 'link-copied', link, fileId}}, '*')
 }
@@ -38,10 +41,15 @@ document.getElementById('cancel').onclick = () => {
   parent.postMessage({pluginMessage: {type: 'cancel'}}, '*')
 }
 
-function generatePrototypeLink (fileId: string, nodeId: string): string {
+function generatePrototypeLink (
+  fileId: string, fileName: string, nodeId: string): string {
+
+  const _nodeId = encodeURIComponent(nodeId)
+  const _fileName = encodeURIComponent(fileName)
+
   const origin = 'https://www.figma.com'
-  const pathname = `/proto/${fileId}`
-  const query = `node-id=${nodeId}&scaling=min-zoom`
+  const pathname = `/proto/${fileId}/${_fileName}`
+  const query = `node-id=${_nodeId}&scaling=min-zoom`
   return origin + pathname + '?' + query
 }
 
