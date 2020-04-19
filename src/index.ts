@@ -7,35 +7,66 @@ main()
 
 
 function main (): void {
-  if (selectedItems.length === 0) {
-    return figma.closePlugin('No layer selected')
+  switch (figma.command as string) {
+    case 'copyPrototypeLink': {
+      return openWindow('copy')
+    }
+    case 'settings': {
+      return openWindow('setup')
+    }
   }
 
+  figma.closePlugin('ERROR: Unknown command')
+}
+
+function openWindow (action: 'setup'|'copy'): void {
   const node: SceneNode|BaseNode|undefined = findItemForLink()
 
   if (!node) {
     return figma.closePlugin('ERROR: Could not get the link item')
   }
-  figma.showUI(__html__, {
-    width: 500,
-    height: 300
-  })
 
-  getNodePrototypeLink(node)
-}
+  const fileId: string = root.getPluginData('shareFileId')
 
-async function getNodePrototypeLink (node: SceneNode|BaseNode): Promise<void> {
-  const fileId: string = await root.getPluginData('shareFileId')
+  if (!fileId && action === 'copy') action = 'setup'
 
-  figma.ui.postMessage({nodeId: node.id, fileId, fileName: root.name}, {origin: '*'})
+  switch (action as string) {
+    case 'setup': {
+      figma.showUI(__html__, {
+        width: 320,
+        height: 280
+      })
 
-  figma.ui.onmessage = async (msg) => {
+      figma.ui.postMessage(
+        {act: 'setup', nodeId: node.id, fileId, fileName: root.name},
+        {origin: '*'}
+      )
+      break
+    }
+    case 'copy': {
+      figma.showUI(__html__, {
+        width: 0,
+        height: 0
+      })
+
+      figma.ui.postMessage(
+        {act: 'copy', nodeId: node.id, fileId, fileName: root.name},
+        {origin: '*'}
+      )
+      break
+    }
+  }
+
+  figma.ui.onmessage = (msg: any) => {
     if (msg.type === 'cancel') {
       figma.closePlugin()
       return
     }
+    if (msg.type === 'save-file-id') {
+      root.setPluginData('shareFileId', msg.fileId)
+      return
+    }
     if (msg.type === 'link-copied') {
-      await root.setPluginData('shareFileId', msg.fileId)
       figma.closePlugin('Prototype link copied to clipboard')
       return
     }
@@ -47,7 +78,7 @@ async function getNodePrototypeLink (node: SceneNode|BaseNode): Promise<void> {
 function findItemForLink (): SceneNode|BaseNode|undefined {
   let linkItem: PageNode|SceneNode|BaseNode
 
-  if (selectedItems.length > 1) {
+  if (!selectedItems.length || selectedItems.length > 1) {
     linkItem = figma.currentPage
   } else {
     const parents: Map<string, SceneNode|BaseNode> = getParentsList(

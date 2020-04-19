@@ -51,6 +51,15 @@ npm run patch
 ```
 
 ## TODO
+- Add a function to get the File Key automatically without need to insert it
+manually. Currently this is not possible, but I hope this feature will be added
+to the Figma API soon.
+- Fix the blinking while Copy Prototype Link command when the fileId does exist.
+The problem is the UI should be displayed to be able to render an input and
+copy value to clipboard. So currently the window (UI) shows up for a second.
+There is no way to copy value without showing the input. Perhaps Figma will
+add an ability to move the window and we will be able to move it out of the
+viewport's edge.
 - Add [setRelaunchData](https://www.figma.com/plugin-docs/api/properties/nodes-setrelaunchdata/)
 
 
