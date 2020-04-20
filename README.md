@@ -1,4 +1,5 @@
-### [UNDER DEVELOPMENT]
+![](img/banner.png)
+
 # Copy Prototype Link &mdash; Figma Plugin
 
 This is a [Figma](figma.com) plugin that provides an easy way to
@@ -9,7 +10,16 @@ to a specific frame without having to switch into the [Presentation mode](https:
 
 ## How To Use
 
-`// TODO: add the instructions`
+Select a layer and run the command `Copy Prototype Link` and the link will
+be copied to the clipboard. When you first start the plugin
+you will need to set the **File Key** on the Settings window manually.
+Just copy the whole **File URL** from the browser's address bar and
+paste it to the input field and the plugin will extract
+the **File Key** automatically. You also can paste only
+the **File Key** to the input field.
+
+The **File Key** looks like:
+> ht<span>tps://figma.com/file/**e9z7p5lisUPmRe9z7p5lisUPm**/FileName
 
 
 
@@ -51,6 +61,7 @@ npm run patch
 ```
 
 ## TODO
+- Update the artwork
 - Add a function to get the File Key automatically without need to insert it
 manually. Currently this is not possible, but I hope this feature will be added
 to the Figma API soon.

@@ -1,6 +1,6 @@
 <template>
 <div class="app">
-  <div class="content" v-if="isShowContentt">
+  <div class="content" v-if="isShowContent">
     <img
       src="../../img/icon.png"
       width="40px"
@@ -11,18 +11,19 @@
 
     <p class="input-group">
       <label for="input">File Key:</label>
+      <a
+        class="info-btn"
+        @click.prevent="toggleInfo"
+      >
+        Info
+      </a>
       <input
         id="input"
         :class="{error: !inputValue}"
         v-model="inputValue"
         @keypress.enter="onClickOk"
       />
-      <a
-        class="info-btn"
-        @click.prevent="toggleInfo"
-      >
-        Information
-      </a>
+      <span class="error-hint" v-if="errorMsg">{{ errorMsg }}</span>
     </p>
 
     <p
@@ -62,16 +63,18 @@
 <script lang="ts">
 import Vue from 'vue'
 
-const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/gm
-const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/gm
-const REG_URL_FILE_ID: RegExp = /\/?(file|proto)\/([a-zA-Z0-9]+)\/?/gm
+const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i
+const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
+const REG_URL_FILE_ID: RegExp = /\/?(file|proto)\/([a-zA-Z0-9]+)\/?/i
 
 export default Vue.extend({
   name: 'App' as string,
   data() {
     return {
       isInfoOpen: false as boolean,
-      isShowContentt: true as boolean,
+      isShowContent: true as boolean,
+      errorMsg: 'Test and long err message Test and long err messageTest and long err message' as string,
+
       nodeId: '' as string,
       fileName: '' as string,
       fileId: '' as string,
@@ -95,7 +98,7 @@ export default Vue.extend({
             this.onClickOk()
           } else {
             this.isInfoOpen = true
-            this.isShowContentt = true
+            this.isShowContent = true
           }
           break
         }
@@ -103,7 +106,7 @@ export default Vue.extend({
           if (!this.fileId) {
             this.isInfoOpen = true
           }
-          this.isShowContentt = true
+          this.isShowContent = true
           break
         }
       }
@@ -113,26 +116,34 @@ export default Vue.extend({
     toggleInfo (): void {
       this.isInfoOpen = !this.isInfoOpen
     },
-    execFileIdFromInput (): string {
-      let fileId: string = ''
+    execFileIdFromInput (): Promise<string> {
+      return new Promise(
+        (resolve: (id: string) => void, reject: (error: any) => void) => {
 
-      if (!this.inputValue) return fileId
+        let fileId: string = ''
 
-      if (REG_URL.test(this.inputValue)) {
-        if (!REG_URL_FIGMA.test(this.inputValue)) {
-          throw new Error('Used URL is not figma.com')
+        if (!this.inputValue) return resolve(fileId)
+
+        if (REG_URL.test(this.inputValue)) {
+          if (!REG_URL_FIGMA.test(this.inputValue)) {
+            return reject('Used URL is not figma.com')
+          }
+
+          const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
+          fileId = res && res[2]
+        } else if (REG_URL_FILE_ID.test(this.inputValue)) {
+          const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
+          fileId = res && res[2]
+        } else {
+          fileId = new String(this.inputValue).replace(/\//g, '')
         }
 
-        const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-        fileId = res && res[2]
-      } else if (REG_URL_FILE_ID.test(this.inputValue)) {
-        const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-        fileId = res && res[2]
-      } else {
-        fileId = this.inputValue.replace(/\//g, '')
-      }
+        if (!fileId) {
+          return reject('Could not extract the File Key from the string')
+        }
 
-      return fileId
+        return resolve(fileId.trim())
+      })
     },
     generatePrototypeLink (): string {
       const _nodeId: string = encodeURIComponent(this.nodeId)
@@ -155,7 +166,14 @@ export default Vue.extend({
       }))
     },
     async onClickOk (): Promise<void> {
-      this.fileId = this.execFileIdFromInput()
+      try {
+        this.fileId = await this.execFileIdFromInput()
+        this.errorMsg = ''
+      } catch (err) {
+        this.errorMsg = err
+        throw new Error(err)
+      }
+
       this.prototypeLink = this.generatePrototypeLink()
 
       parent.postMessage(
@@ -210,7 +228,7 @@ body {
 }
 
 h2 {
-  margin: 0 0 25px;
+  margin: 0;
   color: var(--clr-primary-darken1);
   letter-spacing: 0.4px;
 }
@@ -228,10 +246,13 @@ a:hover {
 .input-group {
   text-align: left;
   padding: 0 20px;
-  margin-top: 10px;
+  margin-top: 35px;
 }
 .input-group label {
   color: var(--clr-primary-darken1);
+  float: left;
+  font-size: 1em;
+  line-height: 1em;
 }
 .input-group input {
   outline: none;
@@ -249,14 +270,22 @@ a:hover {
 .input-group input.error {
   box-shadow: inset 0 0 0 1px var(--clr-accent-secondary) !important;
 }
+.input-group .error-hint {
+  display: block;
+  color: var(--clr-accent-secondary-darken1);
+  font-size: .85em;
+  line-height: 1.3em;
+  padding: 5px;
+}
 .input-group .info-btn {
   display: block;
   float: right;
-  margin-top: 5px;
-  padding: 0 0 5px 5px;
+  padding-right: 3px;
   text-decoration: underline;
   letter-spacing: 0.2px;
   cursor: help;
+  font-size: 1em;
+  line-height: 1em;
 }
 
 
