@@ -61,7 +61,6 @@ npm run patch
 ```
 
 ## TODO
-- Update the artwork
 - Add a function to get the File Key automatically without need to insert it
 manually. Currently this is not possible, but I hope this feature will be added
 to the Figma API soon.
@@ -72,6 +71,11 @@ There is no way to copy value without showing the input. Perhaps Figma will
 add an ability to move the window and we will be able to move it out of the
 viewport's edge.
 - Add [setRelaunchData](https://www.figma.com/plugin-docs/api/properties/nodes-setrelaunchdata/)
+- On Figma, you can set a frame as a Starting Frame for a
+prototype. When you do, by default when you go into prototype mode
+it starts from there. If the starting frame has been set, then
+Copy Prototype Link points to that frame, which isn't intended.
+We should find a way to bypass this behavior.
 
 
 ## Contributing
@@ -80,7 +84,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 
 ## Credits
-The idea initiator - [Filippos Protogeridis](https://github.com/protogeridis)
+The idea initiator & artwork - [Filippos Protogeridis](https://github.com/protogeridis)
 
 
 

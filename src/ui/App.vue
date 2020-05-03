@@ -73,7 +73,7 @@ export default Vue.extend({
     return {
       isInfoOpen: false as boolean,
       isShowContent: true as boolean,
-      errorMsg: 'Test and long err message Test and long err messageTest and long err message' as string,
+      errorMsg: '' as string,
 
       nodeId: '' as string,
       fileName: '' as string,
