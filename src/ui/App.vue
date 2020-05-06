@@ -54,17 +54,21 @@
       <button @click="onClickOk" :disabled="!inputValue">Save</button>
       <button @click="onClickCancel">Cancel</button>
     </div>
+
+    <div class="version">v{{ version }}</div>
   </div>
 
   <input
     type="hidden"
     ref="hiddenInput"
-    :value="prototypeLink"/>
+    :value="prototypeLink"
+  />
 </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import packageJSON from '../../package.json'
 
 const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i
 const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
@@ -77,6 +81,7 @@ export default Vue.extend({
       isInfoOpen: false as boolean,
       isShowContent: true as boolean,
       errorMsg: '' as string,
+      version: packageJSON.version as string,
 
       nodeId: '' as string,
       fileName: '' as string,
@@ -383,5 +388,14 @@ a:hover {
 .input-group input:focus {
   box-shadow: inset 0 0 0 2px var(--clr-accent);
   background: var(--clr-primary-lighten4);
+}
+
+.version {
+  position: absolute;
+  bottom: 2px;
+  right: 3px;
+  font-size: 8px;
+  line-height: 1em;
+  z-index: 7;
 }
 </style>
