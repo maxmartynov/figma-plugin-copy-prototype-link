@@ -11,7 +11,7 @@ to a specific frame without having to switch into the [Presentation mode](https:
 ## How To Use
 
 Select a layer and run the command `Copy Prototype Link` and the link will
-be copied to the clipboard. When you first start the plugin
+be copied to the clipboard. When you first start the plugin in a File
 you will need to set the **File Key** on the Settings window manually.
 Just copy the whole **File URL** from the browser's address bar and
 paste it to the input field and the plugin will extract
@@ -20,6 +20,8 @@ the **File Key** to the input field.
 
 The **File Key** looks like:
 > ht<span>tps://figma.com/file/**e9z7p5lisUPmRe9z7p5lisUPm**/FileName
+
+Your file share link is saved in your File safely. It’s not sent to any external server.
 
 
 
