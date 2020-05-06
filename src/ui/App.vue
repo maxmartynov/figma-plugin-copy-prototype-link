@@ -32,16 +32,19 @@
     >
       <span class="text">
         This plugin requires the <b>File Key</b> to build the prototype link.
-        <br/>
-        <br/>
+
+        <div class="spacer"></div>
         Copy the whole <b>File URL</b> from the browser's address bar and
         paste it to the input field and the plugin will extract
         the <b>File Key</b> automatically. You also can paste only
         the <b>File Key</b> to the input field.
-        <br/>
-        <br/>
+
+        <div class="spacer"></div>
         The <b>File Key</b> looks like:
-        <code>https://figma.com/file/<b>e9z7p5lisUPmR</b>/File</code>
+        <code>https://figma.com/file/<b>e9zCd7p5lisUPmR</b>/File</code>
+
+        <div class="spacer"></div>
+        Your file share link is saved in your File safely. It’s not sent to any external server.
       </span>
 
       <a v-if="isInfoOpen" @click="toggleInfo"><b>Got it</b></a>
@@ -227,8 +230,12 @@ body {
   box-sizing: border-box;
 }
 
+img {
+  margin-top: 5px;
+}
+
 h2 {
-  margin: 0;
+  margin: 5px 0 0 0;
   color: var(--clr-primary-darken1);
   letter-spacing: 0.4px;
 }
@@ -246,7 +253,7 @@ a:hover {
 .input-group {
   text-align: left;
   padding: 0 20px;
-  margin-top: 35px;
+  margin-top: 45px;
 }
 .input-group label {
   color: var(--clr-primary-darken1);
@@ -316,9 +323,12 @@ a:hover {
   padding: 8px 8px 12px;
   overflow: hidden;
 }
+.info-block .text .spacer {
+  height: 1.2em;
+}
 .info-block .text code {
   color: var(--clr-accent-secondary-darken1);
-  font-size: .77em;
+  font-size: .78em;
   margin-top: 5px;
 }
 .info-block .text code b {
