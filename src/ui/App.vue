@@ -58,7 +58,7 @@
     <div class="version">v{{ version }}</div>
   </div>
 
-  <input
+  <textarea
     type="hidden"
     ref="hiddenInput"
     :value="prototypeLink"
@@ -74,6 +74,11 @@ const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?
 const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
 const REG_URL_FILE_ID: RegExp = /\/?(file|proto)\/([a-zA-Z0-9]+)\/?/i
 
+interface NodeObj {
+  id: string
+  name: string
+}
+
 export default Vue.extend({
   name: 'App' as string,
   data() {
@@ -83,7 +88,7 @@ export default Vue.extend({
       errorMsg: '' as string,
       version: packageJSON.version as string,
 
-      nodeId: '' as string,
+      nodes: [] as NodeObj[],
       fileName: '' as string,
       fileId: '' as string,
       inputValue: '' as string,
@@ -92,10 +97,10 @@ export default Vue.extend({
   },
   created (): void {
     window.onmessage = (event: MessageEvent): void => {
-      const msg: {act: string, fileId: string, nodeId: string, fileName: string} =
+      const msg: {act: string, fileId: string, nodes: NodeObj[], fileName: string} =
         event.data.pluginMessage
 
-      this.nodeId = msg.nodeId
+      this.nodes = msg.nodes
       this.fileId = msg.fileId
       this.fileName = msg.fileName
       this.inputValue = msg.fileId || ''
@@ -153,8 +158,8 @@ export default Vue.extend({
         return resolve(fileId.trim())
       })
     },
-    generatePrototypeLink (): string {
-      const _nodeId: string = encodeURIComponent(this.nodeId)
+    generatePrototypeLink (nodeId): string {
+      const _nodeId: string = encodeURIComponent(nodeId)
       const _fileName: string = encodeURIComponent(this.fileName)
 
       const origin: string = 'https://www.figma.com'
@@ -182,7 +187,17 @@ export default Vue.extend({
         throw new Error(err)
       }
 
-      this.prototypeLink = this.generatePrototypeLink()
+      const links = []
+      for (const node of this.nodes) {
+        const link = this.generatePrototypeLink(node.id)
+
+        if (this.nodes.length === 1) {
+          links.push(link)
+        } else {
+          links.push(`${node.name || 'Frame'} — ${link}`)
+        }
+      }
+      this.prototypeLink = links.join('\n')
 
       parent.postMessage(
         {pluginMessage: {type: 'save-file-id', fileId: this.fileId}},
