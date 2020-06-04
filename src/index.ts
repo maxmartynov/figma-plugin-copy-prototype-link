@@ -37,7 +37,7 @@ function openWindow (action: 'setup'|'copy'): void {
   switch (action as string) {
     case 'setup': {
       figma.showUI(__html__, {
-        width: 280,
+        width: 282,
         height: 255
       })
 

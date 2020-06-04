@@ -384,7 +384,7 @@ p {
 .buttons-block button[disabled="disabled"] {
   opacity: .5;
   cursor: auto;
-  background: none;
+  pointer-events: none;
 }
 
 
