@@ -1,67 +1,65 @@
 <template>
 <div class="app">
   <div class="content" v-if="isShowContent">
-    <img
-      src="../../img/icon.png"
-      width="40px"
-      alt="Logo"
-    />
-
-    <h2>Settings</h2>
+    <p>
+      In order for this plugin to work, you will need to provide the file
+      link (URL) below. You only have to do this once.
+      <a @click.prevent="toggleInfo">
+        Where do I find this?
+      </a>
+    </p>
 
     <p class="input-group">
-      <label for="input">File Key:</label>
-      <a
-        class="info-btn"
-        @click.prevent="toggleInfo"
-      >
-        Info
-      </a>
+      <label for="input">File link:</label>
       <input
         id="input"
-        :class="{error: !inputValue}"
+        :class="{error: !inputValue || errorMsg}"
         v-model="inputValue"
         @keypress.enter="onClickOk"
       />
       <span class="error-hint" v-if="errorMsg">{{ errorMsg }}</span>
     </p>
 
-    <p
+    <div
       class="info-block"
       :class="{open: isInfoOpen}"
     >
-      <span class="text">
-        This plugin requires the <b>File Key</b> to build the prototype link.
+      <p class="text">
+        You can get the file link by opening the Share window
+        and then clicking on <b>Copy link</b>
+      </p>
 
-        <div class="spacer"></div>
-        Copy the whole <b>File URL</b> from the browser's address bar and
-        paste it to the input field and the plugin will extract
-        the <b>File Key</b> automatically. You also can paste only
-        the <b>File Key</b> to the input field.
+      <div class="img-wrapper">
+        <img
+          src="../../img/copy-link-screenshot.png"
+          alt="Screenshot"
+        />
+      </div>
 
-        <div class="spacer"></div>
-        The <b>File Key</b> looks like:
-        <code>https://figma.com/file/<b>e9zCd7p5lisUPmR</b>/File</code>
-
-        <div class="spacer"></div>
-        Your file share link is saved in your File safely. It’s not sent to any external server.
-      </span>
-
-      <a v-if="isInfoOpen" @click="toggleInfo"><b>Got it</b></a>
-    </p>
+      <div class="buttons-block">
+        <button @click="toggleInfo" tabindex="3">I've got it</button>
+      </div>
+    </div>
 
     <div class="buttons-block">
       <button @click="onClickOk" :disabled="!inputValue">Save</button>
-      <button @click="onClickCancel">Cancel</button>
     </div>
 
-    <div class="version">v{{ version }}</div>
+    <p class="text-small">
+      The file URL is saved in your file safely.
+      It’s not sent to any external server.
+    </p>
+
+    <div class="footer">
+      <div class="version">v{{ version }}</div>
+    </div>
   </div>
 
   <textarea
     type="hidden"
     ref="hiddenInput"
     :value="prototypeLink"
+    tabindex="-1"
   />
 </div>
 </template>
@@ -103,22 +101,20 @@ export default Vue.extend({
       this.nodes = msg.nodes
       this.fileId = msg.fileId
       this.fileName = msg.fileName
-      this.inputValue = msg.fileId || ''
+      this.inputValue = msg.fileId
+        ? `figma.com/file/${msg.fileId}`
+        : ''
 
       switch (msg.act as string) {
         case 'copy': {
           if (this.fileId) {
             this.onClickOk()
           } else {
-            this.isInfoOpen = true
             this.isShowContent = true
           }
           break
         }
         case 'setup': {
-          if (!this.fileId) {
-            this.isInfoOpen = true
-          }
           this.isShowContent = true
           break
         }
@@ -168,12 +164,9 @@ export default Vue.extend({
       return origin + pathname + '?' + query
     },
     copyToClipboard (str: string): Promise<void> {
-      this.$refs.hiddenInput.setAttribute('type', 'text')
-
       return new Promise((resolve) => setTimeout(() => {
         this.$refs.hiddenInput.select()
         document.execCommand('copy')
-        this.$refs.hiddenInput.setAttribute('type', 'hidden')
         window.getSelection().removeAllRanges()
         resolve()
       }))
@@ -184,7 +177,7 @@ export default Vue.extend({
         this.errorMsg = ''
       } catch (err) {
         this.errorMsg = err
-        throw new Error(err)
+        return console.error(err)
       }
 
       const links = []
@@ -206,9 +199,6 @@ export default Vue.extend({
 
       await this.copyToClipboard(this.prototypeLink)
       parent.postMessage({pluginMessage: {type: 'link-copied'}}, '*')
-    },
-    onClickCancel (): void {
-      parent.postMessage({pluginMessage: {type: 'cancel'}}, '*')
     }
   }
 })
@@ -218,31 +208,41 @@ export default Vue.extend({
 :root {
   --clr-primary: rgb(27, 27, 27);
   --clr-primary-darken1: #000000;
-  --clr-primary-lighten1: #d0d0d0;
-  --clr-primary-lighten2: #ececec;
-  --clr-primary-lighten3: #f1f1f1;
-  --clr-primary-lighten4: #f8f8f8;
-  --clr-secondary: #ccc;
-  --clr-accent: #18a0fb;
+  --clr-primary-lighten1: #787878;
+  --clr-primary-lighten2: #afafaf;
+  --clr-primary-lighten3: #d4d4d4;
+  --clr-primary-lighten4: #f1f1f1;
+  --clr-primary-lighten5: #f8f8f8;
+  --clr-secondary: #18A0FB;
+  --clr-accent: #3aacfb;
   --clr-accent-darken1: #1794e7;
   --clr-accent-lighten2: #dce3e9;
   --clr-accent-secondary: #dc78a5;
   --clr-accent-secondary-darken1: #ad2863;
+
+  --footer-height: 32px;
+}
+
+html,
+body,
+.app {
+  height: 100%;
 }
 
 body {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: "Roboto", "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  font-size: 13px;
+  color: var(--clr-primary-lighten1);
+  font-size: 12px;
+  line-height: 1.4em;
   margin: 0;
 }
 
 .content {
-  text-align: center;
+  text-align: left;
   display: inline-block;
-  padding: 10px;
+  padding: 12px 16px;
   position: relative;
   height: 100%;
   width: 100%;
@@ -250,147 +250,136 @@ body {
   box-sizing: border-box;
 }
 
-img {
-  margin-top: 5px;
-}
-
-h2 {
-  margin: 5px 0 0 0;
-  color: var(--clr-primary-darken1);
-  letter-spacing: 0.4px;
-}
-
 a {
   cursor: pointer;
+  color: var(--clr-accent);
 }
 a:hover {
   color: var(--clr-accent-darken1);
   text-decoration: underline;
 }
 
+p {
+  margin: 0;
+  color: var(--clr-primary-lighten1);
+}
+
+.text-small {
+  font-size: 0.84em;
+  line-height: 1.4em;
+}
 
 
 .input-group {
   text-align: left;
-  padding: 0 20px;
-  margin-top: 45px;
+  margin-top: 1em;
 }
 .input-group label {
-  color: var(--clr-primary-darken1);
   float: left;
   font-size: 1em;
   line-height: 1em;
 }
 .input-group input {
   outline: none;
-  border: 1px solid var(--clr-primary-lighten1);
-  border-radius: 5px;
-  padding: 5px;
+  border: 1px solid var(--clr-primary-lighten3);
+  border-radius: 0;
+  padding: 5px 12px;
   margin-top: 2px;
   width: 100%;
-  height: 30px;
-  font-size: .9em;
+  height: 33px;
+  font-size: 1em;
+  color: var(--clr-primary-darken1);
+  background: none;
+}
+.input-group input::placeholder {
+  color: var(--clr-primary-lighten1);
 }
 .input-group input:hover {
-  box-shadow: inset 0 0 0 1px var(--clr-accent-lighten2);
+  border-color: var(--clr-primary-lighten2);
+}
+.input-group input:focus {
+  border-color: var(--clr-accent);
+  box-shadow: inset 0 0 0 1px var(--clr-accent);
 }
 .input-group input.error {
-  box-shadow: inset 0 0 0 1px var(--clr-accent-secondary) !important;
+  border-color: var(--clr-accent-secondary);
 }
 .input-group .error-hint {
   display: block;
   color: var(--clr-accent-secondary-darken1);
   font-size: .85em;
   line-height: 1.3em;
-  padding: 5px;
-}
-.input-group .info-btn {
-  display: block;
-  float: right;
-  padding-right: 3px;
-  text-decoration: underline;
-  letter-spacing: 0.2px;
-  cursor: help;
-  font-size: 1em;
-  line-height: 1em;
+  padding: 0;
+  height: 0px;
+  overflow: visible;
+  text-align: right;
 }
 
 
 
 .info-block {
-  text-align: center;
   transition: right .2s;
   position: fixed;
   right: -100%;
   left: auto;
   top: 10px;
   bottom: auto;
-  width: calc(100% - 10px * 2);
+  width: 100%;
+  height: calc(100% - var(--footer-height));
   box-sizing: border-box;
   margin: auto 0;
   background: #fff;
   z-index: 5;
+  padding: 0 16px;
 }
 .info-block.open {
-  right: 10px;
+  right: 0;
 }
 .info-block .text {
-  background: var(--clr-primary-lighten3);
-  color: var(--clr-primary-darken1);
-  text-align: left;
-  border-radius: 5px;
-  display: block;
-  padding: 8px 8px 12px;
   overflow: hidden;
 }
-.info-block .text .spacer {
-  height: 1.2em;
+.info-block .text b {
+  font-weight: normal;
+  color: #000;
 }
-.info-block .text code {
-  color: var(--clr-accent-secondary-darken1);
-  font-size: .78em;
-  margin-top: 5px;
+.info-block .img-wrapper {
+  margin: 16px -16px 0;
+  padding: 16px;
+  background: #eff1f5;
+  text-align: center;
 }
-.info-block .text code b {
-  font-size: 1.5em;
-}
-.info-block a {
-  display: block;
-  font-size: 1.2em;
-  margin-top: 5px;
-  padding: 10px;
+.info-block .img-wrapper img {
+  display: inline-block;
+  width: 100%;
+  position: relative;
 }
 
 
 
 .buttons-block {
-  padding: 5px 0;
-  text-align: center;
-  position: absolute;
-  left: 0;
-  bottom: 35px;
   width: 100%;
 }
 .buttons-block button {
   display: inline-block;
-  border-radius: 5px;
-  background: white;
-  color: var(--clr-primary);
+  background: var(--clr-secondary);
+  color: #fff;
   border: none;
-  font-size: .9em;
+  border-radius: 0;
+  font-size: 1em;
   padding: 8px;
-  width: 85px;
-  height: 30px;
-  margin: 0 5px;
-  box-shadow: inset 0 0 0 1px var(--clr-primary);
+  width: 96px;
+  height: 33px;
+  margin: 16px 0;
   outline: none;
   cursor: pointer;
   letter-spacing: 0.1px;
 }
 .buttons-block button:hover {
-  border-radius: 5px;
-  background: var(--clr-primary-lighten4);
-  color: var(--clr-primary-darken1);
+  background: var(--clr-accent);
+}
+.buttons-block button:focus {
+  box-shadow: 0 0 0 1px var(--clr-primary-lighten1);
+  background: var(--clr-accent);
 }
 .buttons-block button[disabled="disabled"] {
   opacity: .5;
@@ -399,18 +388,27 @@ a:hover {
 }
 
 
-.buttons-block button:focus,
-.input-group input:focus {
-  box-shadow: inset 0 0 0 2px var(--clr-accent);
-  background: var(--clr-primary-lighten4);
+
+.footer {
+  border-top: 1px solid #e8efea;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--footer-height);
+  z-index: 7;
+}
+.footer .version {
+  padding-left: 12px;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: var(--footer-height);
 }
 
-.version {
+textarea[type="hidden"] {
+  opacity: 0;
   position: absolute;
-  bottom: 2px;
-  right: 3px;
-  font-size: 8px;
-  line-height: 1em;
-  z-index: 7;
+  bottom: 0;
+  left: -100%;
 }
 </style>
