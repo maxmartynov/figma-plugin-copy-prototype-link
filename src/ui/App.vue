@@ -1,26 +1,27 @@
 <template>
 <div class="app">
   <div class="content" v-if="isShowContent">
-    <p>
+    <!-- <p>
       In order for this plugin to work, you will need to provide the file
       link (URL) below. You only have to do this once.
       <a @click.prevent="toggleInfo">
         Where do I find this?
       </a>
-    </p>
+    </p> -->
 
     <p class="input-group">
-      <label for="input">File link:</label>
+      <label for="input">File Key:</label>
       <input
         id="input"
         :class="{error: !inputValue || errorMsg}"
         v-model="inputValue"
+        disabled
         @keypress.enter="onClickOk"
       />
       <span class="error-hint" v-if="errorMsg">{{ errorMsg }}</span>
     </p>
 
-    <div
+    <!-- <div
       class="info-block"
       :class="{open: isInfoOpen}"
     >
@@ -39,16 +40,17 @@
       <div class="buttons-block">
         <button @click="toggleInfo" tabindex="3">I've got it</button>
       </div>
-    </div>
+    </div> -->
 
     <div class="buttons-block">
-      <button @click="onClickOk" :disabled="!inputValue">Save</button>
+      <!-- <button @click="onClickOk" :disabled="!inputValue">Save</button> -->
+      <button @click="onClickOk">OK</button>
     </div>
 
-    <p class="text-small">
+    <!-- <p class="text-small">
       The file URL is saved in your file safely.
       It’s not sent to any external server.
-    </p>
+    </p> -->
 
     <div class="footer">
       <div class="version">v{{ version }}</div>
@@ -84,7 +86,9 @@ export default Vue.extend({
       isInfoOpen: false as boolean,
       isShowContent: true as boolean,
       errorMsg: '' as string,
-      version: packageJSON.version as string,
+      // TODO:
+      // version: packageJSON.version as string,
+      version: '1.3.0-alpha' as string,
 
       nodes: [] as NodeObj[],
       fileName: '' as string,
@@ -95,15 +99,21 @@ export default Vue.extend({
   },
   created (): void {
     window.onmessage = (event: MessageEvent): void => {
-      const msg: {act: string, fileId: string, nodes: NodeObj[], fileName: string} =
-        event.data.pluginMessage
+      const msg: {
+        act: string,
+        fileId: string,
+        nodes: NodeObj[],
+        fileName: string
+      } = event.data.pluginMessage
 
       this.nodes = msg.nodes
       this.fileId = msg.fileId
       this.fileName = msg.fileName
       this.inputValue = msg.fileId
-        ? `figma.com/file/${msg.fileId}`
-        : ''
+
+      // this.inputValue = msg.fileId
+      //   ? `figma.com/file/${msg.fileId}`
+      //   : ''
 
       switch (msg.act as string) {
         case 'copy': {
@@ -154,7 +164,7 @@ export default Vue.extend({
         return resolve(fileId.trim())
       })
     },
-    generatePrototypeLink (nodeId): string {
+    generatePrototypeLink (nodeId: string): string {
       const _nodeId: string = encodeURIComponent(nodeId)
       const _fileName: string = encodeURIComponent(this.fileName)
 
@@ -163,7 +173,7 @@ export default Vue.extend({
       const query: string = `node-id=${_nodeId}&scaling=min-zoom`
       return origin + pathname + '?' + query
     },
-    copyToClipboard (str: string): Promise<void> {
+    copyToClipboard (): Promise<void> {
       return new Promise((resolve) => setTimeout(() => {
         this.$refs.hiddenInput.select()
         document.execCommand('copy')
@@ -172,13 +182,13 @@ export default Vue.extend({
       }))
     },
     async onClickOk (): Promise<void> {
-      try {
-        this.fileId = await this.execFileIdFromInput()
-        this.errorMsg = ''
-      } catch (err) {
-        this.errorMsg = err
-        return console.error(err)
-      }
+      // try {
+      //   this.fileId = await this.execFileIdFromInput()
+      //   this.errorMsg = ''
+      // } catch (err) {
+      //   this.errorMsg = err
+      //   return console.error(err)
+      // }
 
       const links = []
       for (const node of this.nodes) {
@@ -192,13 +202,13 @@ export default Vue.extend({
       }
       this.prototypeLink = links.join('\n')
 
-      parent.postMessage(
-        {pluginMessage: {type: 'save-file-id', fileId: this.fileId}},
-        '*'
-      )
+      // parent.postMessage(
+      //   {pluginMessage: {type: 'save-file-id', fileId: this.fileId}},
+      //   '*'
+      // )
 
-      await this.copyToClipboard(this.prototypeLink)
-      parent.postMessage({pluginMessage: {type: 'link-copied'}}, '*')
+      await this.copyToClipboard()
+      parent.postMessage({pluginMessage: {type: 'links-copied'}}, '*')
     }
   }
 })

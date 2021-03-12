@@ -30,7 +30,8 @@ function openWindow (action: 'setup'|'copy'): void {
     return figma.closePlugin('ERROR: Could not get the link item')
   }
 
-  const fileId: string = root.getPluginData('shareFileId')
+  // const fileId: string = root.getPluginData('shareFileId')
+  const fileId: string = figma.fileKey
 
   if (!fileId && action === 'copy') action = 'setup'
 
@@ -66,11 +67,11 @@ function openWindow (action: 'setup'|'copy'): void {
       figma.closePlugin()
       return
     }
-    if (msg.type === 'save-file-id') {
-      root.setPluginData('shareFileId', msg.fileId)
-      return
-    }
-    if (msg.type === 'link-copied') {
+    // if (msg.type === 'save-file-id') {
+    //   root.setPluginData('shareFileId', msg.fileId)
+    //   return
+    // }
+    if (msg.type === 'links-copied') {
       figma.closePlugin(nodes.length > 1
         ? `Prototype links (${nodes.length}) copied to clipboard`
         : 'Prototype link copied to clipboard'
