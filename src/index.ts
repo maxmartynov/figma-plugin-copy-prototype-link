@@ -15,7 +15,7 @@ function main (): void {
     case 'copyPrototypeLink': {
       return openWindow('copy')
     }
-    case 'settings': {
+    case 'about': {
       return openWindow('setup')
     }
   }
@@ -24,25 +24,25 @@ function main (): void {
 }
 
 function openWindow (action: 'setup'|'copy'): void {
+  const fileId: string = figma.fileKey
   const nodes: NodeObj[] = convertNodesToJSON(findItemsForLink())
 
+  if (!fileId) {
+    return figma.closePlugin('ERROR: Could not get the File Key')
+  }
   if (!nodes || !nodes.length) {
     return figma.closePlugin('ERROR: Could not get the link item')
   }
 
-  const fileId: string = root.getPluginData('shareFileId')
-
-  if (!fileId && action === 'copy') action = 'setup'
-
-  switch (action as string) {
+  switch (action) {
     case 'setup': {
       figma.showUI(__html__, {
-        width: 282,
-        height: 255
+        width: 280,
+        height: 360
       })
 
       figma.ui.postMessage(
-        {act: 'setup', nodes, fileId, fileName: root.name},
+        {act: 'setup', fileId, fileName: root.name},
         {origin: '*'}
       )
       break
@@ -61,16 +61,13 @@ function openWindow (action: 'setup'|'copy'): void {
     }
   }
 
-  figma.ui.onmessage = (msg: any) => {
+  figma.ui.onmessage = (msg: {type: 'cancel'|'links-copied'}) => {
     if (msg.type === 'cancel') {
       figma.closePlugin()
       return
     }
-    if (msg.type === 'save-file-id') {
-      root.setPluginData('shareFileId', msg.fileId)
-      return
-    }
-    if (msg.type === 'link-copied') {
+
+    if (msg.type === 'links-copied') {
       figma.closePlugin(nodes.length > 1
         ? `Prototype links (${nodes.length}) copied to clipboard`
         : 'Prototype link copied to clipboard'
@@ -116,7 +113,8 @@ function findItemsForLink (): Array<PageNode|SceneNode|BaseNode> {
 }
 
 function getParentsList (
-  node: SceneNode|BaseNode): Map<string, SceneNode|BaseNode> {
+  node: SceneNode|BaseNode
+): Map<string, SceneNode|BaseNode> {
 
   const map: Map<string, SceneNode|BaseNode> = new Map()
 

@@ -1,11 +1,12 @@
 {
-  "name": "Copy Prototype Link",
+  "name": "Prototype Quick Link",
   "id": "832335368157959508",
   "api": "1.0.0",
   "main": "dist/index.js",
   "ui": "dist/ui.html",
+  "enablePrivatePluginApi": true,
   "menu": [
     {"name": "Copy Prototype Link", "command": "copyPrototypeLink"},
-    {"name": "Settings", "command": "settings"}
+    {"name": "About", "command": "about"}
   ]
 }
