@@ -1,3 +1,5 @@
+import PluginActions from './types/PluginActions'
+
 const currentPage: PageNode = figma.currentPage
 const selectedItems: ReadonlyArray<SceneNode> = currentPage.selection
 const root: DocumentNode = figma.root
@@ -13,65 +15,105 @@ main()
 function main (): void {
   switch (figma.command as string) {
     case 'copyPrototypeLink': {
-      return openWindow('copy')
+      return openWindow(PluginActions.copy)
+    }
+    case 'settings': {
+      return openWindow(PluginActions.setup)
     }
     case 'about': {
-      return openWindow('setup')
+      return openWindow(PluginActions.about)
     }
   }
 
   figma.closePlugin('ERROR: Unknown command')
 }
 
-function openWindow (action: 'setup'|'copy'): void {
-  const fileId: string = figma.fileKey
+function openWindow (action: PluginActions): void {
+
+  // INFO: Private plugin method
+  // Only if you are making a private plugin (publishing it internally to your
+  // company that is on an Organization plan) you can get the file key
+  const fileId: string = figma.fileKey ||
+    root.getPluginData('shareFileId')
+
   const nodes: NodeObj[] = convertNodesToJSON(findItemsForLink())
 
-  if (!fileId) {
-    return figma.closePlugin('ERROR: Could not get the File Key')
-  }
   if (!nodes || !nodes.length) {
     return figma.closePlugin('ERROR: Could not get the link item')
   }
 
-  switch (action) {
-    case 'setup': {
+  if (!fileId && action === PluginActions.copy) action = PluginActions.setup
+
+  switch (action as string) {
+    case PluginActions.setup: {
       figma.showUI(__html__, {
-        width: 280,
-        height: 360
+        width: 295,
+        height: 255
       })
 
       figma.ui.postMessage(
-        {act: 'setup', fileId, fileName: root.name},
+        {act: PluginActions.setup, nodes, fileId, fileName: root.name},
         {origin: '*'}
       )
       break
     }
-    case 'copy': {
+    case PluginActions.about: {
+      figma.showUI(__html__, {
+        width: 282,
+        height: 360
+      })
+
+      figma.ui.postMessage(
+        {act: PluginActions.about, nodes, fileId, fileName: root.name},
+        {origin: '*'}
+      )
+      break
+    }
+    case PluginActions.copy: {
       figma.showUI(__html__, {
         width: 0,
         height: 0
       })
 
       figma.ui.postMessage(
-        {act: 'copy', nodes, fileId, fileName: root.name},
+        {act: PluginActions.copy, nodes, fileId, fileName: root.name},
         {origin: '*'}
       )
       break
     }
   }
 
-  figma.ui.onmessage = (msg: {type: 'cancel'|'links-copied'}) => {
+  figma.ui.onmessage = (msg: any) => {
+    if (msg.type === 'message' && msg.message) {
+      figma.notify(msg.message || '')
+      return
+    }
     if (msg.type === 'cancel') {
       figma.closePlugin()
       return
     }
-
+    if (msg.type === 'save-file-id') {
+      root.setPluginData('shareFileId', msg.fileId)
+      return
+    }
     if (msg.type === 'links-copied') {
-      figma.closePlugin(nodes.length > 1
-        ? `Prototype links (${nodes.length}) copied to clipboard`
-        : 'Prototype link copied to clipboard'
-      )
+      let msg: string
+
+      if (!nodes.length) {
+        msg = 'There are no nodes selected to generate the link'
+      } else if (nodes.length === 1) {
+        const nodeName = (nodes[0]?.name || '').trim()
+
+        if (nodeName) {
+          msg = `Prototype link of '${nodeName}' copied to clipboard`
+        } else {
+          msg = 'Prototype link copied to clipboard'
+        }
+      } else {
+        msg = `Prototype links copied to clipboard (${nodes.length})`
+      }
+
+      figma.closePlugin(msg)
       return
     }
 

@@ -9,10 +9,17 @@ copy a [Prototype link](https://help.figma.com/hc/en-us/articles/360039822654-Sh
 
 ## How To Use
 
-Select layers and run the `Copy prototype link` command, and the link will be copied to the clipboard.
+Select layers and run the `Copy prototype link` command, and the link will be copied to the clipboard. You can also select and copy links to multiple selected Frames. In this case, each link will start with the name of its Frame.
 
-You can also select and copy links to multiple selected *Frames*. In this case, each link will start with the name of its *Frame*.
+#### First Setup:
+The plugin must know the **File Key** to be able to create a prototype link. But this Key is private and it is only accessible to plugins published internally to a company that is on an Organization plan. So to make the plugin work you need to insert this File Key manually on first start of the plugin:
 
+1. Click the 'Share' button on the top panel and click the 'Copy link'. Or you also can copy the whole File URL from the browser's address bar. The File URL looks like: https://figma.com/file/e9z7p5lisUPmRe9z7p5lisUPm/FileName
+2. Go to: Plugins -> Prototype Quick Link -> Settings
+3. Paste the copied URL to the input field and the plugin will extract the File Key automatically. You also can paste only the File Key to the input field.
+4. Done! Click 'Save' and use the plugin
+
+#### Info:
 Your file share link is not sent to any external server.
 
 

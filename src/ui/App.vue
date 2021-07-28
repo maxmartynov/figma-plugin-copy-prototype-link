@@ -1,43 +1,11 @@
 <template>
 <div class="app">
-  <div class="content" v-if="isShowContent">
-    <div class="logo-wrapper">
-      <img class="logo" src="../../img/icon.png" />
-    </div>
-
-    <h3 class="text-center" style="color: #000;">
-      Prototype Quick Link
-    </h3>
-
-    <p class="text-center">
-      Copy the prototype link for a selected frame with a single click
-    </p>
-
-    <div class="text-center" style="padding-top: 23px;">
-      <h3>Credits</h3>
-
-      <div>
-        The idea initiator & artwork
-        <br/>
-        <a href="https://www.protogeridis.com" target="_blank">
-          Filippos Protogeridis
-        </a>
-      </div>
-      <br/>
-      <div>
-        Developer
-        <br/>
-        <a href="https://maxmartynov.com/" target="_blank">
-          Max Martynov
-        </a>
-      </div>
-    </div>
-
-
-    <div class="footer">
-      <div class="version">v{{ version }}</div>
-    </div>
-  </div>
+  <component
+    v-if="contentComponent"
+    :is="contentComponent"
+    :fileId="fileId"
+    @save="onSaveFileId"
+  />
 
   <textarea
     type="hidden"
@@ -50,16 +18,13 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import packageJSON from '../../package.json'
-
-interface NodeObj {
-  id: string
-  name: string
-}
+import NodeObj from '../types/NodeObj'
+import PluginActions from '../types/PluginActions'
+import AboutComponent from './components/About.component.vue'
+import SetupComponent from './components/Setup.component.vue'
 
 interface ComponentData {
-  isShowContent: boolean
-  version: string
+  contentComponent?: Vue,
   nodes: NodeObj[]
   fileName: string
   fileId: string
@@ -68,10 +33,13 @@ interface ComponentData {
 
 export default Vue.extend({
   name: 'App',
+  components: {
+    AboutComponent,
+    SetupComponent,
+  },
   data (): ComponentData {
     return {
-      isShowContent: true,
-      version: packageJSON.version,
+      contentComponent: null,
       nodes: [],
       fileName: '',
       fileId: '',
@@ -81,7 +49,7 @@ export default Vue.extend({
   created (): void {
     window.onmessage = (event: MessageEvent): void => {
       const msg: {
-        act: 'setup'|'copy',
+        act: PluginActions,
         fileId: string,
         nodes: NodeObj[],
         fileName: string
@@ -92,16 +60,20 @@ export default Vue.extend({
       this.fileName = msg.fileName
 
       switch (msg.act) {
-        case 'copy': {
+        case PluginActions.copy: {
           if (this.fileId) {
             this.copyLink()
           } else {
-            this.isShowContent = true
+            this.contentComponent = SetupComponent
           }
           break
         }
-        case 'setup': {
-          this.isShowContent = true
+        case PluginActions.setup: {
+          this.contentComponent = SetupComponent
+          break
+        }
+        case PluginActions.about: {
+          this.contentComponent = AboutComponent
           break
         }
       }
@@ -117,14 +89,6 @@ export default Vue.extend({
       const query: string = `node-id=${_nodeId}&scaling=min-zoom`
       return origin + pathname + '?' + query
     },
-    copyToClipboard (): Promise<void> {
-      return new Promise((resolve) => setTimeout(() => {
-        this.$refs.hiddenInput.select()
-        document.execCommand('copy')
-        window.getSelection().removeAllRanges()
-        resolve()
-      }))
-    },
     async copyLink (): Promise<void> {
       const links = []
       for (const node of this.nodes) {
@@ -138,9 +102,35 @@ export default Vue.extend({
       }
       this.prototypeLink = links.join('\n')
 
-      await this.copyToClipboard()
+      await this._copyToClipboard()
       parent.postMessage({pluginMessage: {type: 'links-copied'}}, '*')
-    }
+    },
+    onSaveFileId (fileId: string) {
+      this.fileId = fileId
+      parent.postMessage(
+        {pluginMessage: {type: 'save-file-id', fileId}},
+        '*'
+      )
+      parent.postMessage(
+        {pluginMessage: {
+          type: 'message',
+          message: `File key saved: ${this.fileId}`,
+        }},
+        '*'
+      )
+      this.close()
+    },
+    close () {
+      parent.postMessage({pluginMessage: {type: 'cancel'}}, '*')
+    },
+    _copyToClipboard (): Promise<void> {
+      return new Promise((resolve) => setTimeout(() => {
+        this.$refs.hiddenInput?.select()
+        document.execCommand('copy')
+        window.getSelection().removeAllRanges()
+        resolve()
+      }))
+    },
   }
 })
 </script>
@@ -180,26 +170,6 @@ body {
   margin: 0;
 }
 
-.content {
-  text-align: left;
-  display: inline-block;
-  padding: 12px 16px;
-  position: relative;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-.content .logo-wrapper {
-  text-align: center;
-}
-.content .logo-wrapper .logo {
-  display: inline-block;
-  width: 60px;
-  height: 60px;
-  margin: 15px 0;
-}
-
 a {
   cursor: pointer;
   color: var(--clr-accent);
@@ -218,25 +188,9 @@ p {
   font-size: 0.84em;
   line-height: 1.4em;
 }
+
 .text-center {
   text-align: center;
-}
-
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: var(--footer-height);
-  z-index: 7;
-  text-align: right;
-}
-.footer .version {
-  padding: 0 5px;
-  font-weight: 500;
-  font-size: 10px;
-  line-height: var(--footer-height);
 }
 
 textarea[type="hidden"] {
