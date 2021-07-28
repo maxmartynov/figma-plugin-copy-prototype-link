@@ -127,7 +127,6 @@ export default Vue.extend({
     },
     async copyLink (): Promise<void> {
       const links = []
-      console.log('this.nodes: ', this.nodes)
       for (const node of this.nodes) {
         const link = this.generatePrototypeLink(node.id)
 

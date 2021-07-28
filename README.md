@@ -9,7 +9,7 @@ copy a [Prototype link](https://help.figma.com/hc/en-us/articles/360039822654-Sh
 
 ## How To Use
 
-Select layers and run the `Copy Prototype Link` command, and the link will be copied to the clipboard.
+Select layers and run the `Copy prototype link` command, and the link will be copied to the clipboard.
 
 You can also select and copy links to multiple selected *Frames*. In this case, each link will start with the name of its *Frame*.
 
@@ -32,7 +32,7 @@ Your file share link is not sent to any external server.
 1. Install dependencies
 
     ```sh
-    npm run install
+    npm install
     ```
 
 2. Get the [Figma desktop app](https://www.figma.com/downloads/). At this time, plugin development and testing needs to be done using the Figma desktop app. This is because Figma needs to read your code saved as a local file.

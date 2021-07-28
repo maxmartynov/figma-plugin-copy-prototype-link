@@ -6,7 +6,7 @@
   "ui": "dist/ui.html",
   "enablePrivatePluginApi": true,
   "menu": [
-    {"name": "Copy Prototype Link", "command": "copyPrototypeLink"},
+    {"name": "Copy prototype link", "command": "copyPrototypeLink"},
     {"name": "About", "command": "about"}
   ]
 }
