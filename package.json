@@ -1,6 +1,6 @@
 {
   "name": "figma-plugin-copy-prototype-link",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Figma plugin that provides an easy way to copy a Prototype link to the clipboard without having to switch to the Presentation mode.",
   "main": "dist/index.js",
   "scripts": {
