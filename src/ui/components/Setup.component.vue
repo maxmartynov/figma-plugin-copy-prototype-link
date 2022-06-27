@@ -1,58 +1,67 @@
 <template>
-<div class="setup-component">
-  <p>
-    In order for this plugin to work, you will need to provide the file
-    link (URL) below. You only have to do this once.
-    <a @click.prevent="toggleInfo">
-      Where do I find this?
-    </a>
-  </p>
-
-  <p class="input-group">
-    <label for="input">File link:</label>
-    <input
-      id="input"
-      :class="{error: !inputValue || errorMsg}"
-      v-model="inputValue"
-      @keypress.enter="onClickOk"
-    />
-    <span class="error-hint" v-if="errorMsg">{{ errorMsg }}</span>
-  </p>
-
-  <div
-    class="info-block"
-    :class="{open: isInfoOpen}"
-  >
-    <p class="text">
-      You can get the file link by opening the <b>Share</b> window
-      and then clicking on <b>Copy link</b>
+  <div class="setup-component">
+    <p>
+      In order for this plugin to work, you will need to provide the file link
+      (URL) below. You only have to do this once.
+      <a @click.prevent="toggleInfo">
+        Where do I find this?
+      </a>
     </p>
 
-    <div class="img-wrapper">
-      <img
-        src="../../../img/copy-link-screenshot.png"
-        alt="Screenshot"
+    <p class="input-group">
+      <label for="input">File link:</label>
+      <input
+        id="input"
+        :class="{error: !inputValue || errorMsg}"
+        v-model="inputValue"
+        @keypress.enter="onClickOk"
       />
+      <span class="error-hint" v-if="errorMsg">{{ errorMsg }}</span>
+    </p>
+
+    <p class="input-group">
+      <label for="input">Scaling:</label>
+      <select
+        :value="scaling"
+        @change="$emit('update:scaling', $event.target.value)"
+      >
+        <option
+          v-for="value of SCALING_PARAMS"
+          :key="value"
+          v-text="value"
+        ></option>
+      </select>
+    </p>
+
+    <div class="info-block" :class="{open: isInfoOpen}">
+      <p class="text">
+        You can get the file link by opening the <b>Share</b> window and then
+        clicking on <b>Copy link</b>
+      </p>
+
+      <div class="img-wrapper">
+        <img src="../../../img/copy-link-screenshot.png" alt="Screenshot" />
+      </div>
+
+      <div class="buttons-block">
+        <button @click="toggleInfo" tabindex="3">I've got it</button>
+      </div>
     </div>
 
     <div class="buttons-block">
-      <button @click="toggleInfo" tabindex="3">I've got it</button>
+      <button @click="onClickOk" :disabled="!inputValue">Save</button>
     </div>
-  </div>
 
-  <div class="buttons-block">
-    <button @click="onClickOk" :disabled="!inputValue">Save</button>
+    <p class="text-small">
+      The file URL is saved in your file safely. It’s not sent to any external
+      server.
+    </p>
   </div>
-
-  <p class="text-small">
-    The file URL is saved in your file safely.
-    It’s not sent to any external server.
-  </p>
-</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import {ScalingParam} from '../../types/ScalingParam'
 const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i
 const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
 const REG_URL_FILE_ID: RegExp = /\/?(file|proto)\/([a-zA-Z0-9]+)\/?/i
@@ -63,7 +72,11 @@ export default Vue.extend({
     fileId: {
       type: String,
       required: true,
-    }
+    },
+    scaling: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -71,41 +84,41 @@ export default Vue.extend({
       errorMsg: '',
       inputValue: '',
       prototypeLink: '',
+      SCALING_PARAMS: Object.keys(ScalingParam),
     }
   },
-  mounted () {
-    this.inputValue = this.fileId
-      ? `figma.com/file/${this.fileId}`
-      : ''
+  mounted() {
+    this.inputValue = this.fileId ? `figma.com/file/${this.fileId}` : ''
   },
   methods: {
-    toggleInfo (): void {
+    toggleInfo(): void {
       this.isInfoOpen = !this.isInfoOpen
     },
-    execFileIdFromInput (): Promise<string> {
+    execFileIdFromInput(): Promise<string> {
       return new Promise(
         (resolve: (id: string) => void, reject: (error: any) => void) => {
-        let fileId: string = ''
-        if (!this.inputValue) return resolve(fileId)
-        if (REG_URL.test(this.inputValue)) {
-          if (!REG_URL_FIGMA.test(this.inputValue)) {
-            return reject('Used URL is not figma.com')
+          let fileId: string = ''
+          if (!this.inputValue) return resolve(fileId)
+          if (REG_URL.test(this.inputValue)) {
+            if (!REG_URL_FIGMA.test(this.inputValue)) {
+              return reject('Used URL is not figma.com')
+            }
+            const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
+            fileId = res && res[2]
+          } else if (REG_URL_FILE_ID.test(this.inputValue)) {
+            const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
+            fileId = res && res[2]
+          } else {
+            fileId = new String(this.inputValue).replace(/\//g, '')
           }
-          const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-          fileId = res && res[2]
-        } else if (REG_URL_FILE_ID.test(this.inputValue)) {
-          const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-          fileId = res && res[2]
-        } else {
-          fileId = new String(this.inputValue).replace(/\//g, '')
+          if (!fileId) {
+            return reject('Could not extract the File Key from the string')
+          }
+          return resolve(fileId.trim())
         }
-        if (!fileId) {
-          return reject('Could not extract the File Key from the string')
-        }
-        return resolve(fileId.trim())
-      })
+      )
     },
-    async onClickOk (): Promise<void> {
+    async onClickOk(): Promise<void> {
       let fileId: string
 
       try {
@@ -116,9 +129,9 @@ export default Vue.extend({
         return console.error(err)
       }
 
-      this.$emit('save', fileId)
-    }
-  }
+      this.$emit('save', {fileId, scaling: this.scaling})
+    },
+  },
 })
 </script>
 
@@ -142,7 +155,8 @@ export default Vue.extend({
   font-size: 1em;
   line-height: 1em;
 }
-.input-group input {
+.input-group input,
+.input-group select {
   outline: none;
   border: 1px solid var(--clr-primary-lighten3);
   border-radius: 0;
@@ -170,7 +184,7 @@ export default Vue.extend({
 .input-group .error-hint {
   display: block;
   color: var(--clr-accent-secondary-darken1);
-  font-size: .85em;
+  font-size: 0.85em;
   line-height: 1.3em;
   padding: 0;
   height: 0px;
@@ -178,7 +192,7 @@ export default Vue.extend({
   text-align: right;
 }
 .info-block {
-  transition: right .2s;
+  transition: right 0.2s;
   position: fixed;
   right: -100%;
   left: auto;
@@ -238,8 +252,8 @@ export default Vue.extend({
   box-shadow: 0 0 0 1px var(--clr-primary-lighten1);
   background: var(--clr-accent);
 }
-.buttons-block button[disabled="disabled"] {
-  opacity: .5;
+.buttons-block button[disabled='disabled'] {
+  opacity: 0.5;
   cursor: auto;
   pointer-events: none;
 }

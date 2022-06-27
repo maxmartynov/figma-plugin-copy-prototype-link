@@ -1,41 +1,49 @@
 <template>
-<div class="about-component">
-  <div class="logo-wrapper">
-    <img class="logo" src="../../../img/icon.png" />
-  </div>
-
-  <h3 class="text-center" style="color: #000;">
-    Prototype Quick Link
-  </h3>
-
-  <p class="text-center">
-    Copy the prototype link for a selected frame with a single click
-  </p>
-
-  <div class="text-center" style="padding-top: 23px;">
-    <h3>Credits</h3>
-
-    <div>
-      The idea initiator & artwork
-      <br/>
-      <a href="https://www.protogeridis.com" target="_blank">
-        Filippos Protogeridis
-      </a>
+  <div class="about-component">
+    <div class="logo-wrapper">
+      <img class="logo" src="../../../img/icon.png" />
     </div>
-    <br/>
-    <div>
-      Developer
-      <br/>
-      <a href="https://maxmartynov.com/" target="_blank">
-        Max Martynov
-      </a>
+
+    <h3 class="text-center" style="color: #000;">
+      Prototype Quick Link
+    </h3>
+
+    <p class="text-center">
+      Copy the prototype link for a selected frame with a single click
+    </p>
+
+    <div class="text-center" style="padding-top: 18px;">
+      <h3>Credits</h3>
+
+      <div>
+        The idea initiator & artwork
+        <br />
+        <a href="https://www.protogeridis.com" target="_blank">
+          Filippos Protogeridis
+        </a>
+      </div>
+      <br />
+      <div>
+        Developer
+        <br />
+        <a href="https://maxmartynov.com/" target="_blank">
+          Max Martynov
+        </a>
+      </div>
+    </div>
+
+    <div class="text-center" style="padding-top: 32px;">
+      <div>
+        <a :href="supportLink" target="_blank">
+          Do you have an idea?
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="version">v{{ version }}</div>
     </div>
   </div>
-
-  <div class="footer">
-    <div class="version">v{{ version }}</div>
-  </div>
-</div>
 </template>
 
 <script lang="ts">
@@ -44,9 +52,10 @@ import packageJSON from '../../../package.json'
 
 export default Vue.extend({
   name: 'AboutComponent',
-  data () {
+  data() {
     return {
       version: packageJSON.version,
+      supportLink: packageJSON.bugs.url,
     }
   },
 })
@@ -82,11 +91,14 @@ export default Vue.extend({
   height: var(--footer-height);
   z-index: 7;
   text-align: right;
+  pointer-events: none;
 }
 .about-component .footer .version {
+  display: inline-block;
   padding: 0 5px;
   font-weight: 500;
   font-size: 10px;
   line-height: var(--footer-height);
+  pointer-events: all;
 }
 </style>

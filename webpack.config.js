@@ -13,40 +13,39 @@ module.exports = (env, argv) => ({
   },
 
   resolveLoader: {
-    modules: [path.join(__dirname, 'node_modules')]
+    modules: [path.join(__dirname, 'node_modules')],
   },
   optimization: {
-    minimize: argv.mode === 'production'
+    minimize: argv.mode === 'production',
   },
 
   module: {
     rules: [
-
       // Converts Vue code to JavaScript
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
       },
 
       // Converts TypeScript code to JavaScript
       {
         test: /\.tsx?$/,
         loader: 'ts-loader',
-        options: { appendTsSuffixTo: [/\.vue$/] },
-        exclude: /node_modules/
+        options: {appendTsSuffixTo: [/\.vue$/]},
+        exclude: /node_modules/,
       },
 
       // Enables including CSS by doing "import './file.css'" in your TypeScript code
       {
         test: /\.css$/,
-        loader: [{ loader: 'style-loader' }, { loader: 'css-loader' }]
+        loader: [{loader: 'style-loader'}, {loader: 'css-loader'}],
       },
 
       // Allows you to use "<%= require('./file.svg') %>" in your HTML code to get a data URI
       {
         test: /\.(png|jpg|gif|webp|svg)$/,
-        loader: [{ loader: 'url-loader' }]
+        loader: [{loader: 'url-loader'}],
       },
     ],
   },
@@ -55,8 +54,8 @@ module.exports = (env, argv) => ({
     // Webpack tries these extensions for you if you omit the extension like "import './file'"
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.vue', '.json'],
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
-    }
+      vue$: 'vue/dist/vue.esm.js',
+    },
   },
 
   output: {
@@ -72,7 +71,7 @@ module.exports = (env, argv) => ({
       chunks: ['ui'],
     }),
     new HtmlWebpackInlineSourcePlugin(),
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
   ],
 
   node: {
@@ -85,6 +84,6 @@ module.exports = (env, argv) => ({
     fs: 'empty',
     net: 'empty',
     tls: 'empty',
-    child_process: 'empty'
-  }
-});
+    child_process: 'empty',
+  },
+})

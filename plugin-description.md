@@ -7,6 +7,7 @@ Select layers and run the 'Copy prototype link' command, and the link will be co
 The plugin must know the File Key to be able to create a prototype link. But this Key is private and it is only accessible to plugins published internally to a company that is on an Organization plan. So to make the plugin work you need to insert this File Key manually on first start of the plugin.
 
 **Set the File Key:**
+
 1. Click the 'Share' button on the top panel and click the 'Copy link'. Or you also can copy the whole File URL from the browser's address bar. The File URL looks like: `https://figma.com/file/e9z7p5lisUPmRe9z7p5lisUPm/FileName`
 2. Go to: Plugins -> Prototype Quick Link -> Settings
 3. Paste the copied URL to the input field and the plugin will extract the File Key automatically. You also can paste only the File Key to the input field.
@@ -14,3 +15,6 @@ The plugin must know the File Key to be able to create a prototype link. But thi
 
 Info:
 Your file share link is not sent to any external server.
+
+Plugin is open-source: github.com/maxmartynov/figma-plugin-copy-prototype-link
+You are welcome to contribute.
