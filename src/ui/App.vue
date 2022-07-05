@@ -61,7 +61,6 @@ export default Vue.extend({
         nodes: NodeObj[]
         fileName: string
       } = event.data.pluginMessage
-      console.log('msg: ', msg)
 
       this.nodes = msg.nodes
       this.fileId = msg.fileId
@@ -90,13 +89,11 @@ export default Vue.extend({
   },
   methods: {
     generatePrototypeLink(nodeId: string): string {
-      const _nodeId: string = encodeURIComponent(nodeId)
       const _fileName: string = encodeURIComponent(this.fileName)
-
       const origin: string = 'https://www.figma.com'
       const pathname: string = `/proto/${this.fileId}/${_fileName}`
       const query: string = toQueryString({
-        'node-id': _nodeId,
+        'node-id': nodeId,
         scaling: this.scaling || DEFAULT_SCALING,
       })
       return origin + pathname + '?' + query
