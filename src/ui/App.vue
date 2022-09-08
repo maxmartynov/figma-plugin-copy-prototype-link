@@ -3,8 +3,9 @@
     <component
       v-if="contentComponent"
       :is="contentComponent"
-      :fileId="fileId"
-      :scaling.sync="scaling"
+      :fileId="configParams.fileId"
+      :scaling.sync="configParams.scaling"
+      :hideUI.sync="configParams.hideUI"
       @save="onSave"
     />
 
@@ -19,19 +20,19 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {NodeObj} from '../types/NodeObj'
 import {ScalingParam} from '../types/ScalingParam'
 import {ConfigParams} from '../types/ConfigParams'
 import {PluginActions} from '../types/PluginActions'
 import AboutComponent from './components/About.component.vue'
 import SetupComponent from './components/Setup.component.vue'
+import {PluginMessage} from '../types/PluginMessage'
+import {
+  PluginActionEvent,
+  PluginActionEventBase,
+} from '../types/PluginActionEvent'
 
-interface ComponentData {
-  contentComponent?: Vue
-  nodes: NodeObj[]
-  fileName: string
-  fileId: string
-  scaling: ScalingParam
+interface ComponentData extends PluginActionEventBase {
+  contentComponent?: typeof SetupComponent | typeof AboutComponent
   prototypeLink: string
 }
 const DEFAULT_SCALING = ScalingParam['min-zoom']
@@ -47,41 +48,39 @@ export default Vue.extend({
       contentComponent: null,
       nodes: [],
       fileName: '',
-      fileId: '',
-      scaling: DEFAULT_SCALING,
+      configParams: {
+        fileId: '',
+        scaling: DEFAULT_SCALING,
+        hideUI: 0,
+      },
       prototypeLink: '',
     }
   },
   created(): void {
     window.onmessage = (event: MessageEvent): void => {
-      const msg: {
-        act: PluginActions
-        fileId: string
-        scaling: ScalingParam
-        nodes: NodeObj[]
-        fileName: string
-      } = event.data.pluginMessage
+      const pluginActionEvent: PluginActionEvent = event.data.pluginMessage
+      const {action, configParams, nodes, fileName} = pluginActionEvent
 
-      this.nodes = msg.nodes
-      this.fileId = msg.fileId
-      this.scaling = msg.scaling || DEFAULT_SCALING
-      this.fileName = msg.fileName
+      const data = this as ComponentData
+      data.nodes = nodes
+      data.configParams = configParams
+      data.fileName = fileName
 
-      switch (msg.act) {
+      switch (action) {
         case PluginActions.copy: {
-          if (this.fileId) {
+          if (data.configParams.fileId) {
             this.copyLink()
           } else {
-            this.contentComponent = SetupComponent
+            data.contentComponent = SetupComponent
           }
           break
         }
         case PluginActions.setup: {
-          this.contentComponent = SetupComponent
+          data.contentComponent = SetupComponent
           break
         }
         case PluginActions.about: {
-          this.contentComponent = AboutComponent
+          data.contentComponent = AboutComponent
           break
         }
       }
@@ -89,40 +88,47 @@ export default Vue.extend({
   },
   methods: {
     generatePrototypeLink(nodeId: string): string {
-      const _fileName: string = encodeURIComponent(this.fileName)
+      const data = this as ComponentData
+      const _fileName: string = encodeURIComponent(data.fileName)
       const origin: string = 'https://www.figma.com'
-      const pathname: string = `/proto/${this.fileId}/${_fileName}`
+      const pathname: string = `/proto/${data.configParams.fileId}/${_fileName}`
       const query: string = toQueryString({
         'node-id': nodeId,
-        scaling: this.scaling || DEFAULT_SCALING,
+        scaling: data.configParams.scaling || DEFAULT_SCALING,
+        'hide-ui': data.configParams.hideUI || undefined,
       })
       return origin + pathname + '?' + query
     },
     async copyLink(): Promise<void> {
       const links = []
-      for (const node of this.nodes) {
+      const data = this as ComponentData
+      for (const node of data.nodes) {
         const link = this.generatePrototypeLink(node.id)
 
-        if (this.nodes.length === 1) {
+        if (data.nodes.length === 1) {
           links.push(link)
         } else {
           links.push(`${node.name || 'Frame'} — ${link}`)
         }
       }
-      this.prototypeLink = links.join('\n')
+      data.prototypeLink = links.join('\n')
 
       await this._copyToClipboard()
-      parent.postMessage({pluginMessage: {type: 'links-copied'}}, '*')
+      parent.postMessage(
+        {pluginMessage: <PluginMessage>{type: 'links-copied'}},
+        '*'
+      )
     },
     onSave(payload: ConfigParams) {
-      this.fileId = payload.fileId
-      this.scaling = payload.scaling
-      parent.postMessage({pluginMessage: {type: 'save-config', payload}}, '*')
+      parent.postMessage(
+        {pluginMessage: <PluginMessage>{type: 'save-config', payload}},
+        '*'
+      )
       parent.postMessage(
         {
-          pluginMessage: {
+          pluginMessage: <PluginMessage>{
             type: 'message',
-            message: `Saved. File key: ${this.fileId}`,
+            message: 'Saved',
           },
         },
         '*'
@@ -130,7 +136,7 @@ export default Vue.extend({
       this.close()
     },
     close() {
-      parent.postMessage({pluginMessage: {type: 'cancel'}}, '*')
+      parent.postMessage({pluginMessage: <PluginMessage>{type: 'cancel'}}, '*')
     },
     _copyToClipboard(): Promise<void> {
       return new Promise((resolve) =>

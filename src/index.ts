@@ -1,18 +1,19 @@
+import {ConfigParams} from './types/ConfigParams'
+import {NodeObj} from './types/NodeObj'
+import {PluginActionEvent} from './types/PluginActionEvent'
 import {PluginActions} from './types/PluginActions'
 import {PluginMessage} from './types/PluginMessage'
+import {ScalingParam} from './types/ScalingParam'
 
 const currentPage: PageNode = figma.currentPage
 const selectedItems: ReadonlyArray<SceneNode> = currentPage.selection
 const root: DocumentNode = figma.root
 
-interface NodeObj {
-  id: string
-  name: string
-}
-
 main()
 
 function main(): void {
+  figma.ui.onmessage = onPluginMessage
+
   switch (figma.command as string) {
     case 'copyPrototypeLink': {
       return openWindow(PluginActions.copy)
@@ -29,31 +30,32 @@ function main(): void {
 }
 
 function openWindow(action: PluginActions): void {
-  // INFO: Private plugin method
-  // Only if you are making a private plugin (publishing it internally to your
-  // company that is on an Organization plan) you can get the file key
-  const fileId: string = figma.fileKey || root.getPluginData('shareFileId')
-
-  const scaling: string = root.getPluginData('urlQueryParamScaling')
+  const configParams: ConfigParams = getPluginConfig()
   const nodes: NodeObj[] = convertNodesToJSON(findItemsForLink())
 
   if (!nodes || !nodes.length) {
     return figma.closePlugin('ERROR: Could not get the link item')
   }
 
-  if (!fileId && action === PluginActions.copy) action = PluginActions.setup
+  if (!configParams.fileId && action === PluginActions.copy) {
+    action = PluginActions.setup
+  }
+
+  const pluginAction: PluginActionEvent = {
+    action,
+    nodes,
+    configParams,
+    fileName: root.name,
+  }
 
   switch (action as string) {
     case PluginActions.setup: {
       figma.showUI(__html__, {
         width: 295,
-        height: 285,
+        height: 350,
       })
 
-      figma.ui.postMessage(
-        {act: PluginActions.setup, nodes, fileId, scaling, fileName: root.name},
-        {origin: '*'}
-      )
+      callPluginAction(pluginAction)
       break
     }
     case PluginActions.about: {
@@ -62,10 +64,7 @@ function openWindow(action: PluginActions): void {
         height: 380,
       })
 
-      figma.ui.postMessage(
-        {act: PluginActions.about, nodes, fileId, scaling, fileName: root.name},
-        {origin: '*'}
-      )
+      callPluginAction(pluginAction)
       break
     }
     case PluginActions.copy: {
@@ -74,48 +73,95 @@ function openWindow(action: PluginActions): void {
         height: 0,
       })
 
-      figma.ui.postMessage(
-        {act: PluginActions.copy, nodes, fileId, scaling, fileName: root.name},
-        {origin: '*'}
-      )
+      callPluginAction(pluginAction)
       break
     }
   }
+}
 
-  figma.ui.onmessage = (msg: PluginMessage) => {
-    if (msg.type === 'message' && msg.message) {
-      figma.notify(msg.message || '')
-      return
-    } else if (msg.type === 'cancel') {
-      figma.closePlugin()
-      return
-    } else if (msg.type === 'save-config') {
-      root.setPluginData('shareFileId', msg.payload.fileId)
-      root.setPluginData('urlQueryParamScaling', msg.payload.scaling || '')
-      return
-    } else if (msg.type === 'links-copied') {
-      let msg: string
+function onPluginMessage(msg: PluginMessage) {
+  const nodes: NodeObj[] = convertNodesToJSON(findItemsForLink())
 
-      if (!nodes.length) {
-        msg = 'There are no nodes selected to generate the link'
-      } else if (nodes.length === 1) {
-        const nodeName = (nodes[0]?.name || '').trim()
+  if (msg.type === 'message' && msg.message) {
+    figma.notify(msg.message || '')
+    return
+  } else if (msg.type === 'cancel') {
+    figma.closePlugin()
+    return
+  } else if (msg.type === 'save-config') {
+    savePluginConfig(msg.payload)
+    return
+  } else if (msg.type === 'links-copied') {
+    let msg: string
 
-        if (nodeName) {
-          msg = `Prototype link of '${nodeName}' copied to clipboard`
-        } else {
-          msg = 'Prototype link copied to clipboard'
-        }
+    if (!nodes.length) {
+      msg = 'There are no nodes selected to generate the link'
+    } else if (nodes.length === 1) {
+      const nodeName = (nodes[0]?.name || '').trim()
+
+      if (nodeName) {
+        msg = `Prototype link of '${nodeName}' copied to clipboard`
       } else {
-        msg = `Prototype links copied to clipboard (${nodes.length})`
+        msg = 'Prototype link copied to clipboard'
       }
-
-      figma.closePlugin(msg)
-      return
+    } else {
+      msg = `Prototype links copied to clipboard (${nodes.length})`
     }
 
-    figma.closePlugin()
+    figma.closePlugin(msg)
+    return
   }
+
+  figma.closePlugin()
+}
+
+function callPluginAction(pluginEvent: PluginActionEvent): void {
+  figma.ui.postMessage(pluginEvent, {origin: '*'})
+}
+
+function getPluginConfig(): ConfigParams {
+  // INFO: Private plugin method
+  // Only if you are making a private plugin (publishing it internally to your
+  // company that is on an Organization plan) you can get the file key
+  // const fileId: string = figma.fileKey
+
+  const configParams: ConfigParams = {
+    fileId: '',
+    scaling: undefined,
+    hideUI: undefined,
+  }
+
+  configParams.fileId = root.getPluginData('config.fileId')
+  configParams.scaling = root.getPluginData(
+    'config.scaling'
+  ) as ConfigParams['scaling']
+  configParams.hideUI =
+    (Number(root.getPluginData('config.hideUI')) as ConfigParams['hideUI']) || 0
+
+  // backward compatibility
+  if (!configParams.fileId) {
+    const oldVal = root.getPluginData('shareFileId')
+    if (oldVal) {
+      configParams.fileId = oldVal
+      root.setPluginData('shareFileId', '')
+    }
+  }
+
+  // backward compatibility
+  if (!configParams.scaling) {
+    const oldVal = root.getPluginData('urlQueryParamScaling')
+    if (oldVal) {
+      configParams.scaling = oldVal as ScalingParam
+      root.setPluginData('urlQueryParamScaling', '')
+    }
+  }
+
+  return configParams
+}
+function savePluginConfig(config: ConfigParams) {
+  root.setPluginData('config.fileId', config.fileId)
+  root.setPluginData('config.scaling', config.scaling || '')
+  root.setPluginData('config.hideUI', String(config.hideUI || 0))
 }
 
 function findItemsForLink(): Array<PageNode | SceneNode | BaseNode> {

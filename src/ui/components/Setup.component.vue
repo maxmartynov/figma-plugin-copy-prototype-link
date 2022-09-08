@@ -28,7 +28,23 @@
         <option
           v-for="value of SCALING_PARAMS"
           :key="value"
+          :value="value"
           v-text="value"
+        ></option>
+      </select>
+    </p>
+
+    <p class="input-group">
+      <label for="input">Hide UI:</label>
+      <select
+        :value="hideUI"
+        @change="$emit('update:hideUI', Number($event.target.value))"
+      >
+        <option
+          v-for="opt of HIDE_UI_OPTIONS"
+          :key="opt.value"
+          :value="opt.value"
+          v-text="opt.text"
         ></option>
       </select>
     </p>
@@ -77,6 +93,10 @@ export default Vue.extend({
       type: String,
       required: true,
     },
+    hideUI: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
@@ -85,6 +105,16 @@ export default Vue.extend({
       inputValue: '',
       prototypeLink: '',
       SCALING_PARAMS: Object.keys(ScalingParam),
+      HIDE_UI_OPTIONS: [
+        {
+          text: 'Yes',
+          value: 1,
+        },
+        {
+          text: 'No',
+          value: 0,
+        },
+      ],
     }
   },
   mounted() {
@@ -129,7 +159,7 @@ export default Vue.extend({
         return console.error(err)
       }
 
-      this.$emit('save', {fileId, scaling: this.scaling})
+      this.$emit('save', {fileId, scaling: this.scaling, hideUI: this.hideUI})
     },
   },
 })
