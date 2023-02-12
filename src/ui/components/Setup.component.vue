@@ -3,9 +3,7 @@
     <p>
       In order for this plugin to work, you will need to provide the file link
       (URL) below. You only have to do this once.
-      <a @click.prevent="toggleInfo">
-        Where do I find this?
-      </a>
+      <a @click.prevent="toggleInfo"> Where do I find this? </a>
     </p>
 
     <p class="input-group">
@@ -21,10 +19,7 @@
 
     <p class="input-group">
       <label for="input">Scaling:</label>
-      <select
-        :value="scaling"
-        @change="$emit('update:scaling', $event.target.value)"
-      >
+      <select :value="scaling" @change="onUpdateScaling($event)">
         <option
           v-for="value of SCALING_PARAMS"
           :key="value"
@@ -36,10 +31,7 @@
 
     <p class="input-group">
       <label for="input">Hide UI:</label>
-      <select
-        :value="hideUI"
-        @change="$emit('update:hideUI', Number($event.target.value))"
-      >
+      <select :value="hideUI" @change="onUpdateHideUI($event)">
         <option
           v-for="opt of HIDE_UI_OPTIONS"
           :key="opt.value"
@@ -56,7 +48,7 @@
       </p>
 
       <div class="img-wrapper">
-        <img src="../../../img/copy-link-screenshot.png" alt="Screenshot" />
+        <img src="../../../img/copy-link-screenshot.webp" alt="Screenshot" />
       </div>
 
       <div class="buttons-block">
@@ -78,8 +70,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import {ScalingParam} from '../../types/ScalingParam'
-const REG_URL: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i
-const REG_URL_FIGMA: RegExp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
+const REG_URL: RegExp =
+  /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i
+const REG_URL_FIGMA: RegExp =
+  /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(www)?[\.]?figma\.com(:[0-9]{1,5})?(\/.*)?$/i
 const REG_URL_FILE_ID: RegExp = /\/?(file|proto)\/([a-zA-Z0-9]+)\/?/i
 
 export default Vue.extend({
@@ -133,11 +127,11 @@ export default Vue.extend({
             if (!REG_URL_FIGMA.test(this.inputValue)) {
               return reject('Used URL is not figma.com')
             }
-            const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-            fileId = res && res[2]
+            const res = REG_URL_FILE_ID.exec(this.inputValue)
+            fileId = (res && res[2]) || ''
           } else if (REG_URL_FILE_ID.test(this.inputValue)) {
-            const res: string[] = REG_URL_FILE_ID.exec(this.inputValue)
-            fileId = res && res[2]
+            const res = REG_URL_FILE_ID.exec(this.inputValue)
+            fileId = (res && res[2]) || ''
           } else {
             fileId = new String(this.inputValue).replace(/\//g, '')
           }
@@ -148,6 +142,12 @@ export default Vue.extend({
         }
       )
     },
+    onUpdateScaling($event: any) {
+      this.$emit('update:scaling', $event.target?.value)
+    },
+    onUpdateHideUI($event: any) {
+      this.$emit('update:hideUI', Number($event.target?.value))
+    },
     async onClickOk(): Promise<void> {
       let fileId: string
 
@@ -155,7 +155,7 @@ export default Vue.extend({
         fileId = await this.execFileIdFromInput()
         this.errorMsg = ''
       } catch (err) {
-        this.errorMsg = err
+        this.errorMsg = String(err)
         return console.error(err)
       }
 
@@ -255,6 +255,7 @@ export default Vue.extend({
 .info-block .img-wrapper img {
   display: inline-block;
   width: 100%;
+  min-height: 15px;
   position: relative;
 }
 .buttons-block {

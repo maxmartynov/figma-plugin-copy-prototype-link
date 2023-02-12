@@ -28,5 +28,3 @@ lerna-debug.log*
 
 # IDE - VSCode
 .vscode/*
-
-torrc

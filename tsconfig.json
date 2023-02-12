@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"],
+    "target": "es2015",
+    "module": "es2015",
+    "importHelpers": true,
     "outDir": "dist",
-    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "./node_modules/@types/node"]
 }
