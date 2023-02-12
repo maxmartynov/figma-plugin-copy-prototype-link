@@ -10,7 +10,10 @@ fi
 NEW_VERSION=$(npm version $1)
 TAG_NAME="$NEW_VERSION"
 
-git add package.json
+echo 'Building before bump...'
+npm run build
+
+git add .
 git commit -m $TAG_NAME
 git tag $TAG_NAME
 echo "Bumped version to $TAG_NAME"
