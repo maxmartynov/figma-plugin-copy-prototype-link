@@ -48,13 +48,7 @@ yarn dev
 
 ## Publishing
 
-1. Build for production
-
-   ```sh
-   yarn build
-   ```
-
-2. Bump the app version
+1. Bump the app version
 
    ```sh
    yarn release -- <version>
@@ -69,8 +63,9 @@ yarn dev
 
    - increments the version in the `package.json`
    - creates and pushes commit and tag to the repo (see the `utils/release.sh` file to see the tag template)
+   - makes the new build with the bumped version
 
-3. Follow to the official guide [Publish plugins to the Figma Community](https://help.figma.com/hc/en-us/articles/360042293394-Publish-plugins-to-the-Figma-Community#Submit_your_plugin)
+2. Follow to the official guide [Publish plugins to the Figma Community](https://help.figma.com/hc/en-us/articles/360042293394-Publish-plugins-to-the-Figma-Community#Submit_your_plugin)
 
 ## TODO
 

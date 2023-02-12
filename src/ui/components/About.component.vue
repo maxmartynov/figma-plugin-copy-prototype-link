@@ -51,12 +51,6 @@
       </div>
     </div>
 
-    <!-- <div class="text-center" style="padding-top: 32px">
-      <div>
-        <a :href="supportLink" target="_blank"> Do you have an idea? </a>
-      </div>
-    </div> -->
-
     <div class="footer">
       <div class="version">v{{ version }}</div>
     </div>

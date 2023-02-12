@@ -6,7 +6,7 @@ Select layers and run the 'Copy prototype link' command, and the link will be co
 
 #### Demo Video
 
-https://github.com/maxmartynov/figma-plugin-copy-prototype-link/blob/master/img/demo.gif
+[link to the file](https://github.com/maxmartynov/figma-plugin-copy-prototype-link/blob/master/img/demo.gif) (gif)
 
 #### First Setup
 
@@ -23,4 +23,4 @@ The plugin must know the File Key to be able to create a prototype link. But thi
 
 #### Support
 
-Plugin creation fueled by coffee — [buy me a cuppa](https://www.buymeacoffee.com/maxmartynov).
+Plugin creation fueled by coffee — [buy me a cuppa](https://github.com/maxmartynov/figma-plugin-copy-prototype-link#support).
