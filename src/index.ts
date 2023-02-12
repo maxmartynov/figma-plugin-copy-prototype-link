@@ -60,8 +60,8 @@ function openWindow(action: PluginActions): void {
     }
     case PluginActions.about: {
       figma.showUI(__html__, {
-        width: 282,
-        height: 380,
+        width: 320,
+        height: 480,
       })
 
       callPluginAction(pluginAction)

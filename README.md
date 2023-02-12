@@ -1,4 +1,4 @@
-![](img/banner.png)
+![](img/demo.gif)
 
 # Prototype Quick Link &mdash; Figma Plugin
 
@@ -21,12 +21,6 @@ The plugin must know the **File Key** to be able to create a prototype link. But
 #### Info:
 
 Your file share link is not sent to any external server.
-
-### Demo
-
-`// TODO: add the demo`
-
-[<br><img src="img/demo.gif" width="200"/>](img/demo.gif)
 
 ## Development
 
@@ -63,12 +57,12 @@ yarn dev
 2. Bump the app version
 
    ```sh
-   npm run release -- <version>
+   yarn release -- <version>
 
    # example:
-   npm run release -- patch
+   yarn release -- patch
    # or (shortcut)
-   npm run patch
+   yarn patch
    ```
 
    _This command:_
@@ -99,6 +93,15 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## Credits
 
 The idea initiator & artwork - [Filippos Protogeridis](https://www.protogeridis.com)
+
+## Support
+
+Plugin creation fueled by coffee
+<br/><a title="Buy me a coffee" href="https://www.buymeacoffee.com/maxmartynov" target="_blank"><img src="img/bmc-button.svg" height="70"/></a>
+
+ETH: [0x4d3e86fa5aE38d8615b6da2F37C3E723050112C3](https://etherscan.io/address/0x4d3e86fa5aE38d8615b6da2F37C3E723050112C3)
+
+[<img src="img/di.gif" width="100"/>](img/demo.gif)
 
 ## License
 

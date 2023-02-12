@@ -13,26 +13,49 @@
     <div class="text-center" style="padding-top: 18px">
       <h3>Credits</h3>
 
-      <div>
-        The idea initiator & artwork
+      <div style="display: inline-block; width: 50%; vertical-align: middle">
+        The idea initiator
+        <br />
+        & artwork
         <br />
         <a href="https://www.protogeridis.com" target="_blank">
           Filippos Protogeridis
         </a>
       </div>
-      <br />
-      <div>
+
+      <div style="display: inline-block; width: 50%; vertical-align: middle">
         Developer
         <br />
         <a href="https://maxmartynov.com/" target="_blank"> Max Martynov </a>
       </div>
     </div>
 
-    <div class="text-center" style="padding-top: 32px">
+    <div class="text-center" style="padding-top: 18px">
+      <h3>Support</h3>
+
+      <div>
+        Plugin creation fueled by coffee
+        <br />
+        <a
+          href="https://github.com/maxmartynov/figma-plugin-copy-prototype-link#support"
+          target="_blank"
+        >
+          Buy me a cuppa ☕
+        </a>
+      </div>
+      <br />
+      <div>
+        Do you have an idea or found a bug?
+        <br />
+        <a :href="supportLink" target="_blank"> Let me know </a>
+      </div>
+    </div>
+
+    <!-- <div class="text-center" style="padding-top: 32px">
       <div>
         <a :href="supportLink" target="_blank"> Do you have an idea? </a>
       </div>
-    </div>
+    </div> -->
 
     <div class="footer">
       <div class="version">v{{ version }}</div>
