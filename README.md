@@ -35,7 +35,7 @@ Your file share link is not sent to any external server.
 1. Install dependencies
 
    ```sh
-   npm install
+   yarn install
    ```
 
 2. Get the [Figma desktop app](https://www.figma.com/downloads/). At this time, plugin development and testing needs to be done using the Figma desktop app. This is because Figma needs to read your code saved as a local file.
@@ -49,7 +49,7 @@ Your file share link is not sent to any external server.
 Run the watcher that will transpile .ts files into .js files on change
 
 ```sh
-npm run dev
+yarn dev
 ```
 
 ## Publishing
@@ -57,14 +57,24 @@ npm run dev
 1. Build for production
 
    ```sh
-   npm run build
+   yarn build
    ```
 
 2. Bump the app version
 
    ```sh
-   npm run bump
+   npm run release -- <version>
+
+   # example:
+   npm run release -- patch
+   # or (shortcut)
+   npm run patch
    ```
+
+   _This command:_
+
+   - increments the version in the `package.json`
+   - creates and pushes commit and tag to the repo (see the `utils/release.sh` file to see the tag template)
 
 3. Follow to the official guide [Publish plugins to the Figma Community](https://help.figma.com/hc/en-us/articles/360042293394-Publish-plugins-to-the-Figma-Community#Submit_your_plugin)
 

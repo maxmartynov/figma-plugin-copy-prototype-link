@@ -1,18 +1,16 @@
 <template>
   <div class="about-component">
     <div class="logo-wrapper">
-      <img class="logo" src="../../../img/icon.png" />
+      <img class="logo" src="../../../img/icon.png" alt="Plugin logo" />
     </div>
 
-    <h3 class="text-center" style="color: #000;">
-      Prototype Quick Link
-    </h3>
+    <h3 class="text-center" style="color: #000">Prototype Quick Link</h3>
 
     <p class="text-center">
       Copy the prototype link for a selected frame with a single click
     </p>
 
-    <div class="text-center" style="padding-top: 18px;">
+    <div class="text-center" style="padding-top: 18px">
       <h3>Credits</h3>
 
       <div>
@@ -26,17 +24,13 @@
       <div>
         Developer
         <br />
-        <a href="https://maxmartynov.com/" target="_blank">
-          Max Martynov
-        </a>
+        <a href="https://maxmartynov.com/" target="_blank"> Max Martynov </a>
       </div>
     </div>
 
-    <div class="text-center" style="padding-top: 32px;">
+    <div class="text-center" style="padding-top: 32px">
       <div>
-        <a :href="supportLink" target="_blank">
-          Do you have an idea?
-        </a>
+        <a :href="supportLink" target="_blank"> Do you have an idea? </a>
       </div>
     </div>
 
@@ -48,14 +42,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import packageJSON from '../../../package.json'
+import {version, bugs} from '../../../package.json'
 
 export default Vue.extend({
   name: 'AboutComponent',
   data() {
     return {
-      version: packageJSON.version,
-      supportLink: packageJSON.bugs.url,
+      version: version,
+      supportLink: bugs.url,
     }
   },
 })

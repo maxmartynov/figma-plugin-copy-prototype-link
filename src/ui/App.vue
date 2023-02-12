@@ -32,7 +32,7 @@ import {
 } from '../types/PluginActionEvent'
 
 interface ComponentData extends PluginActionEventBase {
-  contentComponent?: typeof SetupComponent | typeof AboutComponent
+  contentComponent: typeof SetupComponent | typeof AboutComponent | null
   prototypeLink: string
 }
 const DEFAULT_SCALING = ScalingParam['min-zoom']
@@ -141,9 +141,9 @@ export default Vue.extend({
     _copyToClipboard(): Promise<void> {
       return new Promise((resolve) =>
         setTimeout(() => {
-          this.$refs.hiddenInput?.select()
+          ;(this.$refs.hiddenInput as any)?.select()
           document.execCommand('copy')
-          window.getSelection().removeAllRanges()
+          window.getSelection()?.removeAllRanges()
           resolve()
         })
       )

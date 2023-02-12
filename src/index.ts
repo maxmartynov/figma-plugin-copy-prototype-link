@@ -171,9 +171,8 @@ function findItemsForLink(): Array<PageNode | SceneNode | BaseNode> {
     linkItems.push(figma.currentPage)
   } else {
     for (const selectedItem of selectedItems) {
-      const parents: Map<string, SceneNode | BaseNode> = getParentsList(
-        selectedItem
-      )
+      const parents: Map<string, SceneNode | BaseNode> =
+        getParentsList(selectedItem)
       const keys: string[] = Array.from(parents.keys())
 
       for (let i = keys.length - 1; i >= 0; i--) {
