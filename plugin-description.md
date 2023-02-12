@@ -21,4 +21,6 @@ The plugin must know the File Key to be able to create a prototype link. But thi
 
 **Info:** _Your file share link is not sent to any external server._
 
+#### Support
+
 Plugin creation fueled by coffee — [buy me a cuppa](https://www.buymeacoffee.com/maxmartynov).
